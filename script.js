@@ -83,7 +83,17 @@ function placeCourse(container,course,days,startHour){
       const cell = container.querySelector(`.day-cell[data-day='${lesson.day}'][data-time='${timeLabel}']`);
       if (cell) cell.remove();
     }
-
+    
+    block.addEventListener('click', () => {
+      alert(
+        `${course.name} - ${lesson.type}\n` +
+        `${course.professor}\n` +
+        `Credits: ${course.credits}\n` +
+        `Time: ${lesson.start} - ${lesson.end}\n` +
+        `Days: ${lesson.days.join(', ')}`
+      );
+    });
+    
     container.appendChild(block);
   })
 }
