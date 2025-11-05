@@ -1,55 +1,78 @@
-const results = document.getElementById("results");
-const search = document.getElementById("search");
-const schedule = document.getElementById("schedule");
-let selectedCourses = [];
-
-search.addEventListener("input", () => {
-  const query = search.value.toLowerCase();
-  results.innerHTML = "";
-  courses
-    .filter(c => c.name.toLowerCase().includes(query) || c.id.toLowerCase().includes(query))
-    .forEach(c => {
-      const li = document.createElement("li");
-      li.textContent = `${c.id} - ${c.name}`;
-      li.addEventListener("click", () => addCourse(c));
-      results.appendChild(li);
-    });
-});
-
-function addCourse(course) {
-  // check conflicts
-  for (const sc of selectedCourses) {
-    for (const day of course.days) {
-      if (sc.days.includes(day) && !(course.end <= sc.start || course.start >= sc.end)) {
-        alert("Conflict with " + sc.id);
-        return;
-      }
-    }
-  }
-
-  selectedCourses.push(course);
-  renderSchedule();
+function timeToMinutes(time){
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours*60 + minutes;
 }
 
-function renderSchedule() {
-  // clear old
-  document.querySelectorAll(".course-block").forEach(el => el.remove());
+function generateTimeSlots(startHour,endHour){
+  const slots = [];
+  for(let hour = startHour; hour <= endHour;hour++){
+    slots.push('${hour}:00');
+  }
+  return slots;
+}
+function calculateRowFromTime(time, startHour = 8) {
+  const minutes = timeToMinutes(time);
+  const startMinutes = startHour * 60;
+  const hoursPassed = (minutes - startMinutes) / 60;
+  return Math.floor(hoursPassed) + 2; // +2 for header row
+}
+function generateTimeTable(courses){
+  const container = document.getElementById('timetable');
+  const days = ['Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+  const startHour = 8;
+  const endHour = 20;
 
-  selectedCourses.forEach(c => {
-    c.days.forEach(day => {
-      const block = document.createElement("div");
-      block.className = "course-block";
-      block.textContent = c.id;
+  container.style.gridTemplateRows = `50px repeat(${timeSlots.length}, 60px)`;
+  
+  const corner = document.createElement('div');
+  corner.className = 'header-cell';
+  corner.textContent = 'Time';
+  container.appendChild(corner);
 
-      // Rough placement (improve later with real times)
-      const dayIndex = ["Mon","Tue","Wed","Thu","Fri"].indexOf(day);
-      block.style.gridColumn = dayIndex + 1;
+  days.forEach(day => {
+    const header = document.createElement('div');
+    header.className = 'header-cell';
+    header.textContent = day;
+    container.appendChild(header);
+  });
 
-      // Approx row based on start hour
-      const startHour = parseInt(c.start.split(":")[0], 10);
-      block.style.gridRow = (startHour - 7) + " / span 2";
+  timeSlots.forEach(time => {
+    // Time label
+    const timeCell = document.createElement('div');
+    timeCell.className = 'time-cell';
+    timeCell.textContent = time;
+    container.appendChild(timeCell);
 
-      schedule.appendChild(block);
+    // Empty cells for each day
+    days.forEach(day => {
+      const dayCell = document.createElement('div');
+      dayCell.className = 'day-cell';
+      container.appendChild(dayCell);
     });
   });
+
+  courses.forEach(course => {
+      placeCourse(container, course, days, startHour);
+  });
 }
+
+function placeCourse(container,course,days,startHour){
+  lessons.forEach(lesson =>{
+    const block = document.createElement('div');
+    block.className = 'course-block';
+    block.innerHTML = 
+      "<strong> ${course.name}</strong>" + 
+      "<small>${lesson.type}</small>" +
+      "<small>${lesson.start} - ${lesson.end}</small>";
+
+    const dayIndex = days.indexOf(lesson.day);
+    const startRow = calculateRowFromTime(lesson.start, startHour);
+    const endRow = calculateRowFromTime(lesson.end, startHour);
+
+    block.style.gridColumn = dayIndex + 2;
+    block.style.gridRow = '${startRow} / ${endRow}';
+
+    container.appendChild(block);
+  })
+}
+generateTimetable(courses);
