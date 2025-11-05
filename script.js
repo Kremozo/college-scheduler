@@ -6,7 +6,7 @@ function timeToMinutes(time){
 function generateTimeSlots(startHour,endHour){
   const slots = [];
   for(let hour = startHour; hour <= endHour;hour++){
-    slots.push('${hour}:00');
+    slots.push(`${hour}:00`);
   }
   return slots;
 }
@@ -21,7 +21,8 @@ function generateTimeTable(courses){
   const days = ['Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
   const startHour = 8;
   const endHour = 20;
-
+  
+  const timeSlots = generateTimeSlots(startHour, endHour);
   container.style.gridTemplateRows = `50px repeat(${timeSlots.length}, 60px)`;
   
   const corner = document.createElement('div');
@@ -57,22 +58,22 @@ function generateTimeTable(courses){
 }
 
 function placeCourse(container,course,days,startHour){
-  lessons.forEach(lesson =>{
+  course.lessons.forEach(lesson =>{
     const block = document.createElement('div');
     block.className = 'course-block';
-    block.innerHTML = 
-      "<strong> ${course.name}</strong>" + 
-      "<small>${lesson.type}</small>" +
-      "<small>${lesson.start} - ${lesson.end}</small>";
+    block.innerHTML = `
+      <strong>${course.name}</strong><br>
+      <small>${lesson.type}</small><br>
+      <small>${lesson.start} - ${lesson.end}</small>`;
 
     const dayIndex = days.indexOf(lesson.day);
     const startRow = calculateRowFromTime(lesson.start, startHour);
     const endRow = calculateRowFromTime(lesson.end, startHour);
 
     block.style.gridColumn = dayIndex + 2;
-    block.style.gridRow = '${startRow} / ${endRow}';
+    block.style.gridRow = `${startRow} / ${endRow}`;
 
     container.appendChild(block);
   })
 }
-generateTimetable(courses);
+generateTimeTable(courses);
