@@ -10,12 +10,14 @@ function generateTimeSlots(startHour,endHour){
   }
   return slots;
 }
+
 function calculateRowFromTime(time, startHour = 8) {
   const minutes = timeToMinutes(time);
   const startMinutes = startHour * 60;
   const hoursPassed = (minutes - startMinutes) / 60;
   return Math.floor(hoursPassed) + 2; // +2 for header row
 }
+
 function generateTimeTable(courses){
   const container = document.getElementById('timetable');
   const days = ['Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
@@ -48,6 +50,8 @@ function generateTimeTable(courses){
     days.forEach(day => {
       const dayCell = document.createElement('div');
       dayCell.className = 'day-cell';
+      dayCell.dataset.day = day;
+      dayCell.dataset.time = time;
       container.appendChild(dayCell);
     });
   });
@@ -72,6 +76,13 @@ function placeCourse(container,course,days,startHour){
 
     block.style.gridColumn = dayIndex + 2;
     block.style.gridRow = `${startRow} / ${endRow}`;
+    
+    for (let row = startRow; row < endRow; row++) {
+      const timeLabelMinutes = (startHour + row - 2) * 60; // row->time
+      const timeLabel = `${Math.floor(timeLabelMinutes / 60)}:${(timeLabelMinutes % 60).toString().padStart(2,'0')}`;
+      const cell = container.querySelector(`.day-cell[data-day='${lesson.day}'][data-time='${timeLabel}']`);
+      if (cell) cell.remove();
+    }
 
     container.appendChild(block);
   })
